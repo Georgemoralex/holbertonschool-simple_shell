@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <string.h> // Include string.h for strlen function
+#include <string.h>
 
 #define MAX_COMMAND_LENGTH 1024
 
@@ -18,7 +18,7 @@ int main(void) {
             break;
         }
 
-        command[strlen(command) - 1] = '\0'; // This line removes the newline character
+        command[strlen(command) - 1] = '\0';
 
         if (strcmp(command, "/bin/ls") == 0) {
             pid_t pid = fork();

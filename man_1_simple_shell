@@ -1,0 +1,64 @@
+MY_SHELL(1)                 User Commands                 MY_SHELL(1)
+
+NAME
+       my_shell - a simple shell program
+
+SYNOPSIS
+       my_shell [script]
+
+DESCRIPTION
+       MyShell is a simple shell program that allows users to interact
+       with the operating system by executing commands. It provides a
+       basic command-line interface for users to enter commands and execute
+       them.
+
+OPTIONS
+       script
+              If provided, my_shell will execute commands from the specified
+              script file.
+
+COMMANDS
+       MyShell supports various built-in commands along with executing
+       external commands available in the system.
+
+       - cd [directory]: Change the current working directory to the
+              specified directory.
+
+       - pwd: Print the current working directory.
+
+       - ls [directory]: List the contents of the specified directory. If no
+              directory is provided, list the contents of the current
+              directory.
+
+       - exit: Terminate the shell session.
+
+       - help: Display usage information and list available commands.
+
+EXIT STATUS
+       The my_shell command returns a zero exit status upon successful
+       execution of commands. Non-zero exit status indicates an error.
+
+EXAMPLES
+       $ my_shell
+       MyShell $
+
+       $ my_shell script.sh
+       [Execute commands from script.sh]
+
+SEE ALSO
+       bash(1), sh(1), csh(1), ksh(1)
+
+AUTHOR
+       This manual page was written by Jorge Morales <morales.hotch@gmail.com>.
+
+COPYRIGHT
+       Copyright © 2024 Jorge Morales. License GPLv3+: GNU GPL version 3 or
+       later <http://gnu.org/licenses/gpl.html>. This is free software: you
+       are free to change and redistribute it. There is NO WARRANTY, to the
+       extent permitted by law.
+
+BUGS
+       Report bugs to <morales.hotch@gmail.com>.
+
+MyShell                               March 5, 2024                     MY_SHELL(1)
+

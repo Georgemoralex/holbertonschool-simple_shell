@@ -10,15 +10,15 @@ int main(void) {
     char command[MAX_COMMAND_LENGTH];
 
     while (1) {
-        printf("$ "); // Print prompt before input
+        printf("$ ");
         fflush(stdout);
 
         if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL) {
             printf("\n");
-            break; // End of file (Ctrl+D) or error
+            break;
         }
 
-        command[strlen(command) - 1] = '\0'; // Remove newline character
+        command[strlen(command) - 1] = '\0';
 
         pid_t pid = fork();
 
@@ -26,12 +26,12 @@ int main(void) {
             perror("fork");
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
-            // Child process
+
             execlp(command, command, NULL);
             perror("execlp");
             exit(EXIT_FAILURE);
         } else {
-            // Parent process
+
             int status;
             waitpid(pid, &status, 0);
         }

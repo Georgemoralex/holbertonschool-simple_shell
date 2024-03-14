@@ -5,9 +5,8 @@
 * Return: integer
 */
 
-int main()
+int test()
 {
 	printf("Hello, Holberton!\nThis is an example made by Jorge Morales\n");
 	return (0);
 }
-

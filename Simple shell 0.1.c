@@ -20,7 +20,14 @@ void execute_command(char *command) {
 		perror("fork");
 		exit(EXIT_FAILURE);
 	} else if (pid == 0) {
-		char *argv[] = {command, NULL};
+		char **argv = malloc(sizeof(char*) * 2);
+		if (argv == NULL) {
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
+		argv[0] = command;
+		argv[1] = NULL;
+		
 		execve(command, argv, NULL);
 		perror("execve");
 		exit(EXIT_FAILURE);

@@ -34,6 +34,12 @@ void execute_command(char *command) {
 	} else {
 		int status;
 		waitpid(pid, &status, 0);
+		if (WIFEXITED(status)) {
+			exit(WEXITSTATUS(status));
+		} else {
+			perror("waitpid");
+			exit(EXIT_FAILURE);
+		}
 	}
 }
 

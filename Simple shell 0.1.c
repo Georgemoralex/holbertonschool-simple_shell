@@ -43,7 +43,7 @@ int main() {
 	while (1) {
 		prompt();
 		if (fgets(command, sizeof(command), stdin) == NULL) {
-			printf("\nExiting shell.\n");
+			printf("\n");
 			break;
 		}
 

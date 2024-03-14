@@ -20,21 +20,14 @@ void execute_command(char *command) {
 		perror("fork");
 		exit(EXIT_FAILURE);
 	} else if (pid == 0) {
-		char **argv = malloc(sizeof(char*) * 2);
-		if (argv == NULL) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
-		argv[0] = command;
-		argv[1] = NULL;
-		
-		execve(command, argv, NULL);
+		char *argv[] = {command, NULL};
+		extern char **environ;
+		execve(command, argv, environ);
 		perror("execve");
 		exit(EXIT_FAILURE);
 	} else {
 		int status;
 		waitpid(pid, &status, 0);
-		exit(EXIT_SUCCESS);
 	}
 }
 

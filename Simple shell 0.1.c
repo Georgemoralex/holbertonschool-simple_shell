@@ -1,40 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
 
-#define MAX_COMMAND_LENGTH 1024
+#define MAX_COMMAND_LENGTH 100
 
-int main(void) {
-    char command[MAX_COMMAND_LENGTH];
-    pid_t pid;
+void prompt() {
+	printf("$ ");
+}
 
-    while (1) {
-        printf("$ ");
-        fflush(stdout);
+void execute_command(char *command) {
+	pid_t pid = fork();
 
-        if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL) {
-            printf("\n");
-            break;
-        }
+	if (pid == -1) {
+		perror("fork");
+		exit(EXIT_FAILURE);
+	} else if (pid == 0) {
+		char *argv[] = {command, NULL};
+		execve(command, argv, NULL);
+		perror("execve");
+		exit(EXIT_FAILURE);
+	} else {
+		int status;
+		waitpid(pid, &status, 0);
+	}
+}
 
-        command[strlen(command) - 1] = '\0';
+int main() {
+	char command[MAX_COMMAND_LENGTH];
 
-        pid = fork();
+	while (1) {
+		prompt();
+		if (fgets(command, sizeof(command), stdin) == NULL) {
+			printf("\nExiting shell.\n");
+			break;
+		}
 
-        if (pid < 0) {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        } else if (pid == 0) {
-            execlp(command, command, NULL);
-            perror("execlp");
-            exit(EXIT_FAILURE);
-        } else {
-            int status;
-            waitpid(pid, &status, 0);
-        }
-    }
+		command[strcspn(command, "\n")] = '\0';
 
-    return EXIT_SUCCESS;
+		if (strlen(command) == 0) {
+			continue;
+		}
+
+		execute_command(command);
+	}
+
+	return 0;
 }

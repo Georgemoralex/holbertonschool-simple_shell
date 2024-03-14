@@ -16,7 +16,9 @@ void prompt() {
 #include <stdlib.h>
 
 void execute_command(char *command) {
-	pid_t pid = fork();
+	pid_t pid;
+	extern char **environ;
+	pid = fork();
 
 	if (pid == -1) {
 		perror("fork");
@@ -30,7 +32,6 @@ void execute_command(char *command) {
 		argv[0] = command;
 		argv[1] = NULL;
 
-		extern char **environ;
 		execve(command, argv, environ);
 		perror("execve");
 		exit(EXIT_FAILURE);

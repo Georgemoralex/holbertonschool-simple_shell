@@ -13,6 +13,8 @@ void prompt() {
 	printf("$ ");
 }
 
+#include <stdlib.h>
+
 void execute_command(char *command) {
 	pid_t pid = fork();
 
@@ -20,7 +22,14 @@ void execute_command(char *command) {
 		perror("fork");
 		exit(EXIT_FAILURE);
 	} else if (pid == 0) {
-		char *argv[] = {command, NULL};
+		char **argv = malloc(sizeof(char*) * 2);
+		if (argv == NULL) {
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
+		argv[0] = command;
+		argv[1] = NULL;
+
 		extern char **environ;
 		execve(command, argv, environ);
 		perror("execve");

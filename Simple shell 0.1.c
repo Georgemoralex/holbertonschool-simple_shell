@@ -34,7 +34,7 @@ void execute_command(char *command) {
 	} else {
 		int status;
 		waitpid(pid, &status, 0);
-		exit(EXIT_SUCCESS); // Terminate the child process
+		exit(EXIT_SUCCESS);
 	}
 }
 

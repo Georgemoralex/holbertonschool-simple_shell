@@ -42,23 +42,23 @@ void execute_command(char *command) {
 }
 
 int main() {
-	char command[MAX_COMMAND_LENGTH];
+    char command[MAX_COMMAND_LENGTH];
 
-	while (1) {
-		prompt();
-		if (fgets(command, sizeof(command), stdin) == NULL) {
-			printf("\n");
-			break;
-		}
+    while (1) {
+        prompt();
+        if (fgets(command, sizeof(command), stdin) == NULL) {
+            printf("\n");
+            break;
+        }
 
-		command[strcspn(command, "\n")] = '\0';
+        command[strcspn(command, "\n")] = '\0';
 
-		if (strlen(command) == 0) {
-			continue;
-		}
+        if (strlen(command) == 0) {
+            continue;
+        }
 
-		execute_command(command);
-	}
+        execute_command(command);
+    }
 
-	return 0;
+    return 0;
 }

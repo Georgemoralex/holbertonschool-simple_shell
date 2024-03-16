@@ -10,16 +10,17 @@
  */
 int main(int argc, char **argv)
 {
-    (void)argc;
     char prompt[] = "(hsh) ";
     Bool status = true;
+    char *cmdline = NULL;
+    char **cmdargs;
 
     name = (argv[0] != NULL) ? argv[0] : NULL;
 
     while (status)
     {
         write(1, prompt, strlen(prompt));
-        get_user_input();
+        cmdline = get_user_input();
     }
 
     return (0);

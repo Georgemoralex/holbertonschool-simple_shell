@@ -11,8 +11,6 @@
  */
 int main(int argc, char **argv)
 {
-	char *cmdline = NULL;
-	char **cmdargs;
 	char prompt[] = "(hsh) ";
 	Bool status = true;
 
@@ -21,7 +19,7 @@ int main(int argc, char **argv)
 	while (status)
 	{
 		write(1, prompt, strlen(prompt));
-		cmdline = get_user_input();
+		get_user_input();
 	}
 
 	return (0);

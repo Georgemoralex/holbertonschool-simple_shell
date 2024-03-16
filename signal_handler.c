@@ -1,6 +1,6 @@
 #include <signal.h>
 #include <unistd.h>
-#include "sshell.h"
+#include "minishell.h"
 
 /**
  * signal_handler - prints a new prompt upon a signal
@@ -16,3 +16,4 @@ void signal_handler(int fildes)
 	signal(SIGINT, signal_handler);
 	write(STDIN_FILENO, prompt, 3);
 }
+

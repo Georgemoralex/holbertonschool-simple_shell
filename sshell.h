@@ -78,9 +78,7 @@ char *get_user_input();
 /* 0 : readline_error */
 void readline_error(void);
 
-void (*handle_error[])(void) = {
-	readline_error
-};
+extern void (*handle_error[])(void);
 
 
 #endif /* _SSHELL_H_ */

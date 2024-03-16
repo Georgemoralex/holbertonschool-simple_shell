@@ -1,5 +1,8 @@
 #include "sshell.h"
 
+void (*handle_error[])(void) = {
+    readline_error
+};
 
 /**
  * get_user_input - read user input from stdin

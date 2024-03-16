@@ -1,14 +1,5 @@
 #include "sshell.h"
 
-/**
- * main - entry point
- *
- * @argc: number of arguments given to the program
- * @argv: arguments list
- *
- * Return: returns the value of the last executed command
- */
-
 int main(int argc, char **argv)
 {
     char prompt[] = "(hsh) ";
@@ -19,8 +10,8 @@ int main(int argc, char **argv)
 
     while (status)
     {
-        write(1, prompt, strlen(prompt));
         char *input = get_user_input();
+        write(1, prompt, strlen(prompt));
         free(input);
     }
 

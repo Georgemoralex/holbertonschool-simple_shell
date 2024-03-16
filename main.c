@@ -11,6 +11,7 @@
  */
 int main(int argc, char **argv)
 {
+	char cmdline;
 	char prompt[] = "(hsh) ";
 	Bool status = true;
 

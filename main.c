@@ -11,10 +11,10 @@
  */
 int main(int argc, char **argv)
 {
-	char *cmdline = NULL;
-	char **cmdargs;
 	char prompt[] = "(hsh) ";
 	Bool status = true;
+
+	(void)argc;
 
 	name = (argv[0] != NULL) ? argv[0] : NULL;
 

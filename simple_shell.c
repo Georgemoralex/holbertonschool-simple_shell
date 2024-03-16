@@ -1,43 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-#define MAX_INPUT_LENGTH 100
+#define MAX_LINE_LENGTH 80
+#define MAX_ARGS 10
 
-int main(void) {
-    char input[MAX_INPUT_LENGTH];
+int main() {
+	char line[MAX_LINE_LENGTH];
+	char* args[MAX_ARGS];
+	int status;
 
-    while (1) {
+	while (1) {
+		printf("shell> ");
+		fgets(line, MAX_LINE_LENGTH, stdin);
 
-        printf("simple_shell> ");
-        fflush(stdout);
+		int i = 0;
+		args[i] = strtok(line, " \n");
+		while (args[i] != NULL) {
+			i++;
+			args[i] = strtok(NULL, " \n");
+		}
+		args[i] = NULL;
 
+		if (strcmp(args[0], "cd") == 0) {
+			chdir(args[1]);
+			continue;
+		}
+		else if (strcmp(args[0], "exit") == 0) {
+			exit(0);
+		}
 
-        if (fgets(input, sizeof(input), stdin) == NULL) {
-
-            printf("\nGoodbye!\n");
-            break;
-        }
-
-        input[strlen(input) - 1] = '\0';
-
-      
-        pid_t child_pid = fork();
-        if (child_pid == 0) {
-
-            execlp(input, input, NULL); 
-            perror("Error");
-            exit(EXIT_FAILURE);
-        } else if (child_pid > 0) {
-
-            wait(NULL);
-        } else {
-            perror("Fork failed");
-        }
-    }
-
-    return 0;
+		pid_t pid = fork();
+		if (pid < 0) {
+			perror("fork failed");
+			exit(1);
+		}
+		else if (pid == 0) {
+			execvp(args[0], args);
+			perror("execvp failed");
+			exit(1);
+		}
+		else {
+			waitpid(pid, &status, 0);
+		}
+	}
+	return 0;
 }

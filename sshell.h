@@ -10,27 +10,6 @@
 #include <string.h>
 #include <stdio.h>
 
-/* global environemnt */
-extern char **environ;
-/* global program name */
-char *name;
-/* global aliases linked list */
-alias_t *aliases;
-
-/* signals and processes */
-void signal_handler(int);
-
-/* helpers for user inputs */
-char *get_user_input();
-
-/* helpers errors handling */
-/* 0 : readline_error */
-void readline_error(void);
-
-void (*handle_error[])(void) = {
-	readline_error
-};
-
 /**
  * enum _bool - enumeration to use true and false
  * @false: 0
@@ -82,6 +61,26 @@ typedef struct alias_s
     struct alias_s *next;
 } alias_t;
 
+/* global environemnt */
+extern char **environ;
+/* global program name */
+char *name;
+/* global aliases linked list */
+alias_t *aliases;
+
+/* signals and processes */
+void signal_handler(int);
+
+/* helpers for user inputs */
+char *get_user_input();
+
+/* helpers errors handling */
+/* 0 : readline_error */
+void readline_error(void);
+
+void (*handle_error[])(void) = {
+	readline_error
+};
 
 
 #endif /* _SSHELL_H_ */

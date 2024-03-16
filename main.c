@@ -1,29 +1,22 @@
 #include "minishell.h"
 
-
-/**
- * main - entry point
- *
- * @argc: number of arguments given to the program
- * @argv: arguments list
- *
- * Return: returns the value of the last executed command
- */
 int main(int argc, char **argv)
 {
-	char *cmdline;
-	char prompt[] = "(hsh) ";
-	Bool status = true;
+    char *cmdline;
+    char prompt[] = "(hsh) ";
+    Bool status = true;
 
-	(void)argc;
+    (void)argc;
 
-	name = (argv[0] != NULL) ? argv[0] : NULL;
+    name = (argv[0] != NULL) ? argv[0] : NULL;
 
-	while (status)
-	{
-		write(1, prompt, strlen(prompt));
-		cmdline = get_user_input();
-	}
+    while (status)
+    {
+        write(1, prompt, strlen(prompt));
+        cmdline = get_user_input();
+        free(cmdline);
+    }
 
-	return (0);
+    return 0;
 }
+

@@ -10,15 +10,11 @@ int main(int argc, char **argv)
 
     while (status)
     {
-        write(1, prompt, strlen(prompt));
         char *input = get_user_input();
-
-        if (input != NULL && *input != '\0') {
-            execute_command(input);
-        }
-
+        write(1, prompt, strlen(prompt));
         free(input);
     }
 
     return (0);
 }
+

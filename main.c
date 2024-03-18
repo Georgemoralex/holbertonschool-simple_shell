@@ -7,26 +7,21 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
-int main(void)
-{
+int main(void) {
   char cmd[MAX_COMMAND_LENGTH];
   pid_t pid;
   ssize_t read_bytes;
 
-  while (1)
-  {
-    if (isatty(STDIN_FILENO))
-    {
+  while (1) {
+    if (isatty(STDIN_FILENO)) {
       printf("$ ");
       fflush(stdout);
     }
 
     memset(cmd, 0, sizeof(cmd));
     read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
-    if (read_bytes <= 0)
-    {
-      if (isatty(STDIN_FILENO))
-      {
+    if (read_bytes <= 0) {
+      if (isatty(STDIN_FILENO)) {
         printf("\n");
       }
       break;
@@ -35,19 +30,19 @@ int main(void)
     cmd[read_bytes - 1] = '\0';
 
     pid = fork();
-    if (pid == 0)
-    {
-      char *exec_argv[] = {"/bin/sh", "-c", cmd, NULL};
+    if (pid == 0) {
+      char *exec_argv[4];
+      exec_argv[0] = "/bin/sh";
+      exec_argv[1] = "-c";
+      exec_argv[2] = cmd;
+      exec_argv[3] = NULL;
+
       execvp(exec_argv[0], exec_argv);
       fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
       exit(127);
-    }
-    else if (pid > 0)
-    {
+    } else if (pid > 0) {
       wait(NULL);
-    }
-    else
-    {
+    } else {
       perror("fork");
       exit(EXIT_FAILURE);
     }

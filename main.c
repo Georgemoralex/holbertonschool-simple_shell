@@ -7,14 +7,12 @@
 #define BUFFER_SIZE 1024
 
 void display_prompt() {
-    /* printf("simple_shell$ ");*/
     fflush(stdout);
 }
 
 int main() {
     char buffer[BUFFER_SIZE];
     pid_t pid;
-    size_t length;
 
     while (1) {
         display_prompt();
@@ -24,11 +22,7 @@ int main() {
             break;
         }
 
-        length = strlen(buffer);
-        while (length > 0 && (buffer[length - 1] == '\n' || buffer[length - 1] == ' ' || buffer[length - 1] == '\t')) {
-            buffer[length - 1] = '\0';
-            length--;
-        }
+        buffer[strcspn(buffer, "\n")] = '\0';
 
         pid = fork();
 
@@ -36,6 +30,9 @@ int main() {
             perror("fork failed");
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
+            freopen("/dev/null", "w", stdout);
+            freopen("/dev/null", "w", stderr);
+            
             if (execlp(buffer, buffer, NULL) == -1) {
                 perror("execlp failed");
                 exit(EXIT_FAILURE);

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #define BUFFER_SIZE 1024
 
@@ -18,17 +20,31 @@ int main() {
 
         if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
             perror("fgets failed");
-            continue;
+            exit(EXIT_FAILURE);
         }
 
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        if (strcmp(buffer, "exit") == 0) {
-            should_run = 0;
-            continue;
-        }
+        pid_t pid = fork();
 
-        printf("Executing command: %s\n", buffer);
+        if (pid == -1) {
+            perror("fork failed");
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            if (execlp(buffer, buffer, NULL) == -1) {
+                perror("execlp failed");
+                exit(EXIT_FAILURE);
+            }
+            exit(EXIT_SUCCESS);
+        } else {
+            int status;
+            waitpid(pid, &status, 0);
+            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                printf("Command executed successfully\n");
+            } else {
+                printf("Command failed\n");
+            }
+        }
     }
 
     return 0;

@@ -7,11 +7,6 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
-/**
- * main - Entry point for the custom shell program
- *
- * Return: Always returns 0 (Success)
- */
 int main(void)
 {
   char cmd[MAX_COMMAND_LENGTH];
@@ -21,32 +16,31 @@ int main(void)
   while (1)
   {
     if (isatty(STDIN_FILENO))
-      printf("$ "), fflush(stdout);
+    {
+      printf("$ ");
+      fflush(stdout);
+    }
 
     memset(cmd, 0, sizeof(cmd));
     read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
     if (read_bytes <= 0)
     {
       if (isatty(STDIN_FILENO))
+      {
         printf("\n");
+      }
       break;
     }
 
     cmd[read_bytes - 1] = '\0';
+
     pid = fork();
     if (pid == 0)
     {
-      char *argv[4];
-      argv[0] = "/bin/sh";
-      argv[1] = "-c";
-      argv[2] = cmd;
-      argv[3] = NULL;
-
-      if (execvp(argv[0], argv) == -1)
-      {
-        fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-        exit(127);
-      }
+      char *exec_argv[] = {"/bin/sh", "-c", cmd, NULL};
+      execvp(exec_argv[0], exec_argv);
+      fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+      exit(127);
     }
     else if (pid > 0)
     {
@@ -60,4 +54,3 @@ int main(void)
   }
   return 0;
 }
-

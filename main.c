@@ -32,7 +32,6 @@ int main(void)
             break;
         }
 
-<<<<<<< HEAD
         if (cmd[read_bytes - 1] == '\n')
         {
             cmd[read_bytes - 1] = '\0';
@@ -41,9 +40,6 @@ int main(void)
         {
             cmd[read_bytes] = '\0';
         }
-=======
-        cmd[read_bytes - 1] = '\0';
->>>>>>> 106e86b492a611de609e5e5346f886c96ca9c0e8
 
         pid = fork();
         if (pid == 0)
@@ -54,7 +50,6 @@ int main(void)
             exec_argv[2] = cmd;
             exec_argv[3] = NULL;
 
-<<<<<<< HEAD
             execvp(exec_argv[0], exec_argv);
             exit(EXIT_FAILURE);
         }
@@ -77,30 +72,6 @@ int main(void)
             perror("fork");
             exit(EXIT_FAILURE);
         }
-=======
-            execvp(exec_argv[0], exec_argv);
-            fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-            exit(127);
-        }
-        else if (pid > 0)
-        {
-            int status;
-            wait(&status);
-            if (WIFEXITED(status))
-            {
-                int exit_status = WEXITSTATUS(status);
-                if (exit_status == 127)
-                {
-                    fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                }
-            }
-        }
-        else
-        {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
->>>>>>> 106e86b492a611de609e5e5346f886c96ca9c0e8
     }
     return 0;
 }

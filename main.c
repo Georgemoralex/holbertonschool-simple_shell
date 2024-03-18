@@ -57,9 +57,8 @@ int main() {
             }
             output_buffer[bytes_read] = '\0';
 
-            if (output_buffer[bytes_read - 1] == '\n') {
+            if (bytes_read > 0 && output_buffer[bytes_read - 1] == '\n') {
                 output_buffer[bytes_read - 1] = '\0';
-                bytes_read--;
             }
 
             printf("%s\n", output_buffer);

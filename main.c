@@ -4,59 +4,54 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define BUFFER_SIZE 1024
+#define MAX_COMMAND_LENGTH 1024
 
-void display_prompt() {
-    fflush(stdout);
-}
+/**
+ * main - Entry point for simple_shell
+ *
+ * Return: Always 0 (Success)
+ */
+int main(void)
+{
+	char cmd[MAX_COMMAND_LENGTH];
+	char *newline;
+	pid_t pid;
+	int status;
 
-int main() {
-    char buffer[BUFFER_SIZE];
-    pid_t pid;
-    int pipefd[2];
-    char output_buffer[BUFFER_SIZE];
+	while (1)
+	{
+		printf("$ ");
+		if (fgets(cmd, sizeof(cmd), stdin) == NULL)
+		{
+			printf("\n");
+			break;
+		}
 
-    while (1) {
-        display_prompt();
+		newline = strchr(cmd, '\n');
+		if (newline)
+			*newline = '\0';
 
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
-            printf("\n");
-            break;
-        }
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork failed");
+			exit(EXIT_FAILURE);
+		}
 
-        buffer[strcspn(buffer, "\n")] = '\0';
+		if (pid == 0)
+		{
+			char *argv[] = {cmd, NULL};
+			if (execvp(cmd, argv) == -1)
+			{
+				printf("simple_shell: command not found: %s\n", cmd);
+				exit(EXIT_FAILURE);
+			}
+		}
+		else
+		{
+			waitpid(pid, &status, 0);
+		}
+	}
 
-        if (pipe(pipefd) == -1) {
-            perror("pipe failed");
-            exit(EXIT_FAILURE);
-        }
-
-        pid = fork();
-
-        if (pid == -1) {
-            perror("fork failed");
-            exit(EXIT_FAILURE);
-        } else if (pid == 0) {
-            close(pipefd[0]);
-            dup2(pipefd[1], STDOUT_FILENO);
-            close(pipefd[1]);
-
-            execlp("sh", "sh", "-c", buffer, NULL);
-            perror("execlp failed");
-            exit(EXIT_FAILURE);
-        } else {
-            close(pipefd[1]);
-            waitpid(pid, NULL, 0);
-
-            ssize_t bytes_read = read(pipefd[0], output_buffer, sizeof(output_buffer));
-            if (bytes_read == -1) {
-                perror("read failed");
-                exit(EXIT_FAILURE);
-            }
-            output_buffer[bytes_read] = '\0';
-            printf("%s", output_buffer);
-        }
-    }
-
-    return (0);
+	return (0);
 }

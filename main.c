@@ -37,15 +37,13 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            char *argv[4];
-            argv[0] = "/bin/sh";
-            argv[1] = "-c";
-            argv[2] = cmd;
-            argv[3] = NULL;
+            char *argv[] = {"/bin/sh", "-c", cmd, NULL};
 
-            execvp(argv[0], argv);
-            perror("execvp");
-            exit(EXIT_FAILURE);
+            if (execvp(argv[0], argv) == -1)
+            {
+                fprintf(stderr, "%s: %s: not found\n", argv[0], cmd);
+                exit(127);
+            }
         }
         else if (pid > 0)
         {

@@ -11,7 +11,7 @@
 /**
  * command_exists - Checks if a command exists in the system's PATH.
  * @cmd: The command to check.
- * 
+ *
  * Return: 1 if the command exists, 0 otherwise.
  */
 int command_exists(const char *cmd)
@@ -37,7 +37,7 @@ int command_exists(const char *cmd)
  * Reads commands using read() and executes them, displaying a prompt
  * in interactive mode. It handles command execution in a child process,
  * and checks the PATH before executing.
- * 
+ *
  * Return: Always 0 (Success).
  */
 int main(void)
@@ -74,7 +74,13 @@ int main(void)
         pid = fork();
         if (pid == 0) /* Child process */
         {
-            char *argv[] = {"/bin/sh", "-c", cmd, NULL};
+            char *argv[4]; // Allocate space for arguments
+
+            argv[0] = "/bin/sh";
+            argv[1] = "-c";
+            argv[2] = cmd; // Assign cmd here
+            argv[3] = NULL; // Terminate the array
+
             execvp(argv[0], argv);
             /* If execvp returns, it failed */
             fprintf(stderr, "Failed to execute command\n");

@@ -37,7 +37,11 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            char *argv[] = {"/bin/sh", "-c", cmd, NULL};
+            char *argv[4];
+            argv[0] = "/bin/sh";
+            argv[1] = "-c";
+            argv[2] = cmd;
+            argv[3] = NULL;
 
             execvp(argv[0], argv);
             perror("execvp");

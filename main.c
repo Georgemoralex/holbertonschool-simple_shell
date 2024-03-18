@@ -6,11 +6,12 @@
 #include <sys/wait.h>
 
 #define MAX_COMMAND_LENGTH 1024
+#define DELIM " "
 
 /**
  * main - Entry point for a simple UNIX command line interpreter.
- * Reads commands using read() and executes them three times, displaying a prompt
- * in interactive mode.
+ * Reads commands using read() and executes each space-separated command,
+ * displaying a prompt in interactive mode.
  *
  * Return: Always 0 (Success).
  */
@@ -20,6 +21,7 @@ int main(void)
     int num_read;
     pid_t pid;
     char *argv[2];
+    char *token;
 
     while (1)
     {
@@ -29,12 +31,9 @@ int main(void)
             fflush(stdout);
         }
 
-        /* Clear the command buffer */
         memset(cmd, 0, MAX_COMMAND_LENGTH);
-
-        /* Read command from stdin using read */
         num_read = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
-        if (num_read <= 0) /* Check for read error or EOF */
+        if (num_read <= 0)
         {
             if (isatty(STDIN_FILENO))
             {
@@ -42,8 +41,6 @@ int main(void)
             }
             break;
         }
-
-        /* Handle newline character at the end */
         if (cmd[num_read - 1] == '\n')
         {
             cmd[num_read - 1] = '\0';
@@ -53,7 +50,9 @@ int main(void)
             cmd[num_read] = '\0';
         }
 
-        for (int i = 0; i < 3; i++) // Loop to execute the command three times
+        // Tokenize the input and execute each command separately
+        token = strtok(cmd, DELIM);
+        while (token != NULL)
         {
             pid = fork();
             if (pid == -1)
@@ -61,22 +60,21 @@ int main(void)
                 perror("fork");
                 exit(EXIT_FAILURE);
             }
-
-            if (pid == 0) /* Child process */
+            if (pid == 0) // Child process
             {
-                argv[0] = cmd;
+                argv[0] = token;
                 argv[1] = NULL;
-                execvp(cmd, argv);
+                execvp(token, argv);
                 perror("execvp");
                 exit(EXIT_FAILURE);
             }
-            else /* Parent process */
+            else // Parent process
             {
-                wait(NULL); /* Wait for the child process to finish */
+                wait(NULL); // Wait for the child process to finish
             }
+            token = strtok(NULL, DELIM); // Get the next command
         }
     }
 
     return (0);
 }
-

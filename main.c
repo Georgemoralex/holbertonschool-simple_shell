@@ -1,67 +1,93 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define MAX_COMMAND_LENGTH 1024
-#define OUTPUT_BUFFER_SIZE 4096 /* Adjust based on expected maximum command output */
 
-int main(void) {
+/**
+ * main - Entry point for a simple UNIX command line interpreter.
+ * This shell executes commands in both interactive and non-interactive mode
+ * and displays a prompt in interactive mode only.
+ *
+ * Return: Always 0 (Success).
+ */
+int main(void)
+{
     char cmd[MAX_COMMAND_LENGTH];
     int pipe_fd[2];
     pid_t pid;
     ssize_t read_len;
-    char output[OUTPUT_BUFFER_SIZE];
-    char *argv[2]; /* Declare argv here, initializing it later */
+    char output[MAX_COMMAND_LENGTH];
+    char *argv[2];
 
-    while (1) {
-        printf("$");
-        fflush(stdout);
+    while (1)
+    {
+        /* Display prompt only in interactive mode */
+        if (isatty(STDIN_FILENO))
+        {
+            printf("$ ");
+            fflush(stdout);
+        }
 
-        if (!fgets(cmd, MAX_COMMAND_LENGTH, stdin)) {
-            printf("\n");
+        if (!fgets(cmd, MAX_COMMAND_LENGTH, stdin))
+        {
+            if (isatty(STDIN_FILENO))
+            {
+                printf("\n"); /* Print newline on EOF in interactive mode */
+            }
             break;
         }
 
-        if (cmd[strlen(cmd) - 1] == '\n') {
-            cmd[strlen(cmd) - 1] = '\0'; /* Remove trailing newline */
+        /* Remove trailing newline */
+        size_t len = strlen(cmd);
+        if (len > 0 && cmd[len - 1] == '\n')
+        {
+            cmd[len - 1] = '\0';
         }
 
-        if (pipe(pipe_fd) == -1) {
+        /* Setup pipe for capturing command output */
+        if (pipe(pipe_fd) == -1)
+        {
             perror("pipe");
             continue;
         }
 
         pid = fork();
-        if (pid == -1) {
+        if (pid == -1)
+        {
             perror("fork");
             exit(EXIT_FAILURE);
         }
 
-        if (pid == 0) {
+        if (pid == 0)
+        {
             /* Child process */
-            close(pipe_fd[0]); /* Close unused read end */
+            close(pipe_fd[0]); /* Close the read end of the pipe */
             dup2(pipe_fd[1], STDOUT_FILENO); /* Redirect stdout to pipe */
-            dup2(pipe_fd[1], STDERR_FILENO); /* Optional: Redirect stderr to pipe */
-            close(pipe_fd[1]);
+            close(pipe_fd[1]); /* Close the write end, no longer needed */
 
-            argv[0] = cmd; /* Assign cmd to argv[0] here */
+            /* Prepare and execute command */
+            argv[0] = cmd;
             argv[1] = NULL;
-
             execvp(cmd, argv);
             perror("execvp"); /* execvp only returns on error */
             exit(EXIT_FAILURE);
-        } else {
+        }
+        else
+        {
             /* Parent process */
-            close(pipe_fd[1]); /* Close unused write end */
+            close(pipe_fd[1]); /* Close the write end of the pipe */
 
-            /* Read and process the output from the child process */
-            while ((read_len = read(pipe_fd[0], output, sizeof(output) - 1)) > 0) {
+            /* Read and directly output command's result to stdout */
+            while ((read_len = read(pipe_fd[0], output, sizeof(output) - 1)) > 0)
+            {
                 output[read_len] = '\0';
-                printf("%s", output);
+                write(STDOUT_FILENO, output, read_len);
             }
-            close(pipe_fd[0]);
+            close(pipe_fd[0]); /* Close the read end of the pipe */
 
             wait(NULL); /* Wait for the child process to finish */
         }

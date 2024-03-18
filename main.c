@@ -12,6 +12,7 @@ int main(void)
     char cmd[MAX_COMMAND_LENGTH];
     pid_t pid;
     ssize_t read_bytes;
+    char *exec_argv[4];
 
     while (1)
     {
@@ -32,23 +33,27 @@ int main(void)
             break;
         }
 
-        if (cmd[read_bytes - 1] == '\n')
-        {
-            cmd[read_bytes - 1] = '\0';
-        }
-        else
-        {
-            cmd[read_bytes] = '\0';
-        }
+        cmd[read_bytes - 1] = '\0';
 
         pid = fork();
         if (pid == 0)
         {
-            unsetenv("PATH");
-            char *exec_argv[4] = {"/bin/sh", "-c", cmd, NULL};
-            execvp(exec_argv[0], exec_argv);
-            fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-            exit(127);
+            char *path_env = getenv("PATH");
+            if (path_env == NULL || strlen(path_env) == 0)
+            {
+                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+                exit(127);
+            }
+            else
+            {
+                exec_argv[0] = "/bin/sh";
+                exec_argv[1] = "-c";
+                exec_argv[2] = cmd;
+                exec_argv[3] = NULL;
+
+                execvp(exec_argv[0], exec_argv);
+                exit(EXIT_FAILURE);
+            }
         }
         else if (pid > 0)
         {

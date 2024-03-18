@@ -36,8 +36,6 @@ int main() {
             perror("fork failed");
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
-            char output_buffer[BUFFER_SIZE];
-
             close(pipefd[0]);
             dup2(pipefd[1], STDOUT_FILENO);
             close(pipefd[1]);
@@ -46,11 +44,11 @@ int main() {
             perror("execlp failed");
             exit(EXIT_FAILURE);
         } else {
-            ssize_t bytes_read;
-            char output_buffer[BUFFER_SIZE];
-
             close(pipefd[1]);
             waitpid(pid, NULL, 0);
+
+            ssize_t bytes_read;
+            char output_buffer[BUFFER_SIZE];
 
             bytes_read = read(pipefd[0], output_buffer, sizeof(output_buffer));
             if (bytes_read == -1) {

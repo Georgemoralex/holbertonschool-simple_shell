@@ -21,7 +21,6 @@ int main(void)
     pid_t pid;
     char output[MAX_COMMAND_LENGTH];
     char *argv[2];
-    size_t len;
 
     while (1)
     {
@@ -95,4 +94,5 @@ int main(void)
 
     return (0);
 }
+
 

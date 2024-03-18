@@ -6,74 +6,68 @@
 #include <sys/wait.h>
 
 #define MAX_COMMAND_LENGTH 1024
-#define PATH_MAX 4096 /* Assuming a maximum path length */
+#define PATH_MAX 4096
 
-/**
- * command_exists - Checks if a command exists in the system's PATH.
- * @cmd: The command to check.
- *
- * Return: 1 if the command exists, 0 otherwise.
- */
-int command_exists(const char *cmd)
-{
-    char *path = getenv("PATH");
-    char path_copy[PATH_MAX];
-    char *dir;
+int command_exists(const char *cmd) {
+    char *paths[] = {
+        "/bin/",
+        "/usr/bin/",
+        "/sbin/",
+        "/usr/sbin/",
+        "/usr/local/bin/",
+        NULL
+    };
     char full_path[PATH_MAX];
+    int i;
 
-    strcpy(path_copy, path);
-
-    for (dir = strtok(path_copy, ":"); dir != NULL; dir = strtok(NULL, ":"))
-    {
-        snprintf(full_path, sizeof(full_path), "%s/%s", dir, cmd);
-        if (access(full_path, X_OK) == 0)
-            return (1); /* Command found */
+    for (i = 0; paths[i] != NULL; i++) {
+        snprintf(full_path, sizeof(full_path), "%s%s", paths[i], cmd);
+        if (access(full_path, X_OK) == 0) {
+            return 1;
+        }
     }
-    return (0); /* Command not found */
+
+    return 0;
 }
 
-/**
- * main - Entry point for a simple UNIX command line interpreter.
- * Reads commands using read() and executes them, displaying a prompt
- * in interactive mode. It handles command execution in a child process,
- * and checks the PATH before executing.
- *
- * Return: Always 0 (Success).
- */
-int main(void)
-{
+int main(void) {
     char cmd[MAX_COMMAND_LENGTH];
     pid_t pid;
     ssize_t read_bytes;
 
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-        {
+    while (1) {
+        if (isatty(STDIN_FILENO)) {
             printf("$ ");
             fflush(stdout);
         }
 
         memset(cmd, 0, sizeof(cmd));
         read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
-        if (read_bytes <= 0)
-        {
-            if (isatty(STDIN_FILENO))
+        if (read_bytes <= 0) {
+            if (isatty(STDIN_FILENO)) {
                 printf("\n");
-            break; /* EOF or read error */
+            }
+            break;
         }
 
         cmd[read_bytes - 1] = (cmd[read_bytes - 1] == '\n') ? '\0' : cmd[read_bytes - 1];
 
-        if (!command_exists(cmd))
-        {
+        char *space_pos = strchr(cmd, ' ');
+        char command_name[MAX_COMMAND_LENGTH];
+        if (space_pos != NULL) {
+            strncpy(command_name, cmd, space_pos - cmd);
+            command_name[space_pos - cmd] = '\0';
+        } else {
+            strcpy(command_name, cmd);
+        }
+
+        if (!command_exists(command_name)) {
             fprintf(stderr, "Command not found\n");
-            continue; /* Skip fork() if command does not exist */
+            continue;
         }
 
         pid = fork();
-        if (pid == 0) /* Child process */
-        {
+        if (pid == 0) {
             char *argv[4];
 
             argv[0] = "/bin/sh";
@@ -82,19 +76,17 @@ int main(void)
             argv[3] = NULL;
 
             execvp(argv[0], argv);
-            /* If execvp returns, it failed */
             fprintf(stderr, "Failed to execute command\n");
             exit(EXIT_FAILURE);
         }
-        else if (pid > 0) /* Parent process */
-        {
-            wait(NULL); /* Wait for the child process to finish */
+        else if (pid > 0) {
+            wait(NULL);
         }
-        else
-        {
+        else {
             perror("fork");
             exit(EXIT_FAILURE);
         }
     }
-    return (0);
+
+    return 0;
 }

@@ -17,7 +17,7 @@ int main(void)
     {
         if (isatty(STDIN_FILENO))
         {
-            printf("$ ");
+            printf("");
         }
 
         if (fgets(cmd, sizeof(cmd), stdin) == NULL)

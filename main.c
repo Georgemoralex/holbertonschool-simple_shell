@@ -18,7 +18,7 @@ int main() {
 
         if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
             perror("fgets failed");
-            exit(EXIT_FAILURE);
+            continue;
         }
 
         buffer[strcspn(buffer, "\n")] = '\0';

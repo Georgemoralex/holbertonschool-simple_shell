@@ -7,7 +7,7 @@
 #define BUFFER_SIZE 1024
 
 void display_prompt() {
-    printf("simple_shell$ ");
+    /* printf("simple_shell$ ");*/
     fflush(stdout);
 }
 

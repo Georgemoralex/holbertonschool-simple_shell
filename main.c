@@ -1,68 +1,83 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
 
 #define MAX_COMMAND_LENGTH 1024
+#define OUTPUT_BUFFER_SIZE 4096 /* Adjust based on expected maximum command output */
 
 /**
- * main - Entry point for a simple UNIX command line interpreter.
+ * main - Entry point for a simple UNIX command line interpreter
+ *        that captures, potentially modifies, and prints the output of commands.
  *
- * Return: Always 0.
+ * Return: Always 0 (Success)
  */
 int main(void)
 {
     char cmd[MAX_COMMAND_LENGTH];
-    char *newline;
+    int pipe_fd[2];
     pid_t pid;
-    int status;
+    ssize_t read_len;
+    char output[OUTPUT_BUFFER_SIZE];
 
     while (1)
     {
-        if (isatty(STDIN_FILENO))
-        {
-            printf("$");
-            fflush(stdout); /* Ensure the prompt is displayed immediately. */
-        }
+        printf("$");
+        fflush(stdout);
 
-        if (!fgets(cmd, sizeof(cmd), stdin))
+        if (!fgets(cmd, MAX_COMMAND_LENGTH, stdin))
         {
-            printf("\n"); /* Print newline on EOF. */
+            printf("\n");
             break;
         }
 
-        newline = strchr(cmd, '\n');
-        if (newline)
-            *newline = '\0'; /* Remove newline from input. */
+        if (cmd[strlen(cmd) - 1] == '\n')
+        {
+            cmd[strlen(cmd) - 1] = '\0'; /* Remove trailing newline */
+        }
+
+        if (pipe(pipe_fd) == -1)
+        {
+            perror("pipe");
+            continue;
+        }
 
         pid = fork();
         if (pid == -1)
         {
-            perror("fork failed");
+            perror("fork");
             exit(EXIT_FAILURE);
         }
 
         if (pid == 0)
         {
-            /* Child process executes the command. */
-            char *argv[2]; /* Move the initialization out of the declaration */
-            argv[0] = cmd;
-            argv[1] = NULL;
+            /* Child process */
+            close(pipe_fd[0]); /* Close unused read end */
+            dup2(pipe_fd[1], STDOUT_FILENO); /* Redirect stdout to pipe */
+            dup2(pipe_fd[1], STDERR_FILENO); /* Optional: Redirect stderr to pipe */
+            close(pipe_fd[1]);
 
+            char *argv[] = {cmd, NULL};
             execvp(cmd, argv);
-            /* If execvp returns, an error occurred. */
-            printf("simple_shell: command not found: %s\n", cmd);
+            perror("execvp"); /* execvp only returns on error */
             exit(EXIT_FAILURE);
         }
         else
         {
-            /* Parent process waits for the child to complete. */
-            waitpid(pid, &status, 0);
-            if (WIFEXITED(status))
+            /* Parent process */
+            close(pipe_fd[1]); /* Close unused write end */
+
+            /* Read and process the output from the child process */
+            while ((read_len = read(pipe_fd[0], output, sizeof(output) - 1)) > 0)
             {
-                /* Optionally handle the child's exit status. */
+                output[read_len] = '\0';
+                /* Potential place to modify output before printing */
+                printf("%s", output);
             }
+            close(pipe_fd[0]);
+
+            wait(NULL); /* Wait for the child process to finish */
         }
     }
 

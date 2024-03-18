@@ -44,14 +44,37 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            char *exec_argv[4];
-            exec_argv[0] = "/bin/sh";
-            exec_argv[1] = "-c";
-            exec_argv[2] = cmd;
-            exec_argv[3] = NULL;
+            char *env_path = getenv("PATH");
+            if (env_path != NULL && strlen(env_path) == 0)
+            {
+                char *common_dirs[] = {"/bin/", "/usr/bin/", NULL};
+                int i = 0;
+                while (common_dirs[i] != NULL)
+                {
+                    char full_path[MAX_COMMAND_LENGTH];
+                    snprintf(full_path, sizeof(full_path), "%s%s", common_dirs[i], cmd);
+                    if (access(full_path, X_OK) == 0)
+                    {
+                        execl(full_path, cmd, (char *)NULL);
+                        fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+                        exit(127);
+                    }
+                    i++;
+                }
+                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+                exit(127);
+            }
+            else
+            {
+                char *exec_argv[4];
+                exec_argv[0] = "/bin/sh";
+                exec_argv[1] = "-c";
+                exec_argv[2] = cmd;
+                exec_argv[3] = NULL;
 
-            execvp(exec_argv[0], exec_argv);
-            exit(EXIT_FAILURE);
+                execvp(exec_argv[0], exec_argv);
+                exit(EXIT_FAILURE);
+            }
         }
         else if (pid > 0)
         {
@@ -62,8 +85,7 @@ int main(void)
                 int exit_status = WEXITSTATUS(status);
                 if (exit_status != 0)
                 {
-                    fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                    return 127;
+                    continue;
                 }
             }
         }

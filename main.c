@@ -13,14 +13,13 @@ void display_prompt() {
 
 int main() {
     char buffer[BUFFER_SIZE];
-    int should_run = 1;
 
-    while (should_run) {
+    while (1) {
         display_prompt();
 
         if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
-            perror("fgets failed");
-            exit(EXIT_FAILURE);
+            printf("\n");
+            break;
         }
 
         buffer[strcspn(buffer, "\n")] = '\0';
@@ -32,14 +31,13 @@ int main() {
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
             if (execlp(buffer, buffer, NULL) == -1) {
-                perror("execlp failed");
+                printf("Command not found: %s\n", buffer);
                 exit(EXIT_FAILURE);
             }
-            exit(EXIT_SUCCESS);
         } else {
             int status;
             waitpid(pid, &status, 0);
-            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS) {
                 printf("Command executed successfully\n");
             } else {
                 printf("Command failed\n");

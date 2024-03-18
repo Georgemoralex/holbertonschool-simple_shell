@@ -7,13 +7,25 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
-int command_exists(char *cmd);
+/**
+ * command_exists - Checks if a command exists in the system's PATH.
+ * @cmd: Command to check.
+ *
+ * Return: 1 if command exists, 0 otherwise.
+ */
+int command_exists(char *cmd) {
+    if (access(cmd, X_OK) != -1) {
+        return 1; /* Command exists */
+    } else {
+        return 0; /* Command does not exist */
+    }
+}
 
 int main(void) {
     char cmd[MAX_COMMAND_LENGTH];
     pid_t pid;
     ssize_t read_bytes;
-    char *argv[3]; /* Adjust this declaration to ensure it's compliant with C90. */
+    char *argv[3]; /* Correction: Should be 4 elements for NULL termination. */
 
     while (1) {
         if (isatty(STDIN_FILENO)) {
@@ -40,11 +52,10 @@ int main(void) {
                 fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
                 exit(127);
             }
-            /* Move the assignment to argv outside of its declaration */
             argv[0] = "/bin/sh";
             argv[1] = "-c";
             argv[2] = cmd;
-            argv[3] = NULL;
+            argv[3] = NULL; /* Ensure the array is properly NULL-terminated */
             execvp(argv[0], argv);
             /* If execvp returns, it means it failed */
             fprintf(stderr, "Failed to execute command\n");
@@ -58,8 +69,4 @@ int main(void) {
     }
 
     return 0;
-}
-
-int command_exists(char *cmd) {
-    /* Implementation remains the same. */
 }

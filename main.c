@@ -14,6 +14,7 @@ void display_prompt() {
 int main() {
     char buffer[BUFFER_SIZE];
     pid_t pid;
+    size_t length; // Declare length here
 
     while (1) {
         display_prompt();
@@ -23,7 +24,7 @@ int main() {
             break;
         }
 
-        size_t length = strlen(buffer);
+        length = strlen(buffer);
         while (length > 0 && (buffer[length - 1] == '\n' || buffer[length - 1] == ' ' || buffer[length - 1] == '\t')) {
             buffer[length - 1] = '\0';
             length--;

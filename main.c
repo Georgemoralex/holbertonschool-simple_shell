@@ -7,45 +7,57 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
-int main(void) {
-    char cmd[MAX_COMMAND_LENGTH];
-    pid_t pid;
-    ssize_t read_bytes;
+/**
+ * main - Entry point for the custom shell program
+ *
+ * Return: Always returns 0 (Success)
+ */
+int main(void)
+{
+  char cmd[MAX_COMMAND_LENGTH];
+  pid_t pid;
+  ssize_t read_bytes;
 
-    while (1) {
-        if (isatty(STDIN_FILENO)) {
-            printf("$ ");
-            fflush(stdout);
-        }
+  while (1)
+  {
+    if (isatty(STDIN_FILENO))
+      printf("$ "), fflush(stdout);
 
-        memset(cmd, 0, sizeof(cmd));
-        read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
-        if (read_bytes <= 0) {
-            if (isatty(STDIN_FILENO)) {
-                printf("\n");
-            }
-            break;
-        }
-
-        cmd[read_bytes - 1] = '\0';
-
-        pid = fork();
-        if (pid == 0) {
-            char *argv[] = {"/bin/sh", "-c", cmd, NULL};
-
-            if (execvp(argv[0], argv) == -1) {
-                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                exit(127);
-            }
-        } else if (pid > 0) {
-            int status;
-            wait(&status);
-        } else {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
+    memset(cmd, 0, sizeof(cmd));
+    read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
+    if (read_bytes <= 0)
+    {
+      if (isatty(STDIN_FILENO))
+        printf("\n");
+      break;
     }
 
-    return 0;
+    cmd[read_bytes - 1] = '\0';
+    pid = fork();
+    if (pid == 0)
+    {
+      char *argv[4];
+      argv[0] = "/bin/sh";
+      argv[1] = "-c";
+      argv[2] = cmd;
+      argv[3] = NULL;
+
+      if (execvp(argv[0], argv) == -1)
+      {
+        fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+        exit(127);
+      }
+    }
+    else if (pid > 0)
+    {
+      wait(NULL);
+    }
+    else
+    {
+      perror("fork");
+      exit(EXIT_FAILURE);
+    }
+  }
+  return 0;
 }
 

@@ -7,6 +7,11 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
+/**
+ * main - Entry point of the shell program
+ *
+ * Return: Always 0 (Success)
+ */
 int main(void)
 {
     char cmd[MAX_COMMAND_LENGTH];
@@ -37,20 +42,26 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            char *argv[] = {"/bin/sh", "-c", cmd, NULL};
+            char *argv[4]; /* Command arguments array */
+            argv[0] = "/bin/sh";
+            argv[1] = "-c";
+            argv[2] = cmd;
+            argv[3] = NULL;
 
             if (execvp(argv[0], argv) == -1)
             {
-                fprintf(stderr, "%s: %s: not found\n", argv[0], cmd);
-                exit(127);
+                fprintf(stderr, "%s: command not found\n", cmd);
+                exit(EXIT_FAILURE);
             }
         }
         else if (pid > 0)
         {
+            /* Parent process waits for the child to complete */
             wait(NULL);
         }
         else
         {
+            /* Handle fork failure */
             perror("fork");
             exit(EXIT_FAILURE);
         }

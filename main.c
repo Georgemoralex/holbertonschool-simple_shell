@@ -74,12 +74,12 @@ int main(void)
         pid = fork();
         if (pid == 0) /* Child process */
         {
-            char *argv[4]; // Allocate space for arguments
+            char *argv[4];
 
             argv[0] = "/bin/sh";
             argv[1] = "-c";
-            argv[2] = cmd; // Assign cmd here
-            argv[3] = NULL; // Terminate the array
+            argv[2] = cmd;
+            argv[3] = NULL;
 
             execvp(argv[0], argv);
             /* If execvp returns, it failed */

@@ -14,10 +14,10 @@ int main() {
     char buffer[BUFFER_SIZE];
     pid_t pid;
     int pipefd[2];
-    char output_buffer[BUFFER_SIZE]; // Move the declaration here
 
     while (1) {
         display_prompt();
+        char output_buffer[BUFFER_SIZE]; /* Move the declaration here */
 
         if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
             printf("\n");

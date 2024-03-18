@@ -56,7 +56,13 @@ int main() {
                 exit(EXIT_FAILURE);
             }
             output_buffer[bytes_read] = '\0';
-            printf("%s", output_buffer);
+
+            if (output_buffer[bytes_read - 1] == '\n') {
+                output_buffer[bytes_read - 1] = '\0';
+                bytes_read--;
+            }
+
+            printf("%s\n", output_buffer);
         }
     }
 

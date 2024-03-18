@@ -9,7 +9,7 @@
 
 /**
  * main - Entry point for a simple UNIX command line interpreter.
- * Reads commands using read() and executes them, displaying a prompt
+ * Reads commands using read() and executes them three times, displaying a prompt
  * in interactive mode.
  *
  * Return: Always 0 (Success).
@@ -17,9 +17,8 @@
 int main(void)
 {
     char cmd[MAX_COMMAND_LENGTH];
-    int pipe_fd[2], num_read;
+    int num_read;
     pid_t pid;
-    char output[MAX_COMMAND_LENGTH];
     char *argv[2];
 
     while (1)
@@ -54,45 +53,30 @@ int main(void)
             cmd[num_read] = '\0';
         }
 
-        if (pipe(pipe_fd) == -1)
+        for (int i = 0; i < 3; i++) // Loop to execute the command three times
         {
-            perror("pipe");
-            continue;
-        }
-
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
-
-        if (pid == 0) /* Child process */
-        {
-            close(pipe_fd[0]);
-            dup2(pipe_fd[1], STDOUT_FILENO);
-            close(pipe_fd[1]);
-
-            argv[0] = cmd;
-            argv[1] = NULL;
-            execvp(cmd, argv);
-            perror("execvp");
-            exit(EXIT_FAILURE);
-        }
-        else /* Parent process */
-        {
-            close(pipe_fd[1]);
-            while ((num_read = read(pipe_fd[0], output, sizeof(output) - 1)) > 0)
+            pid = fork();
+            if (pid == -1)
             {
-                output[num_read] = '\0';
-                write(STDOUT_FILENO, output, num_read);
+                perror("fork");
+                exit(EXIT_FAILURE);
             }
-            close(pipe_fd[0]);
-            wait(NULL);
+
+            if (pid == 0) /* Child process */
+            {
+                argv[0] = cmd;
+                argv[1] = NULL;
+                execvp(cmd, argv);
+                perror("execvp");
+                exit(EXIT_FAILURE);
+            }
+            else /* Parent process */
+            {
+                wait(NULL); /* Wait for the child process to finish */
+            }
         }
     }
 
     return (0);
 }
-
 

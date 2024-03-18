@@ -36,12 +36,15 @@ int main(void)
         {
             cmd[read_bytes - 1] = '\0';
         }
+        else
+        {
+            cmd[read_bytes] = '\0';
+        }
 
         pid = fork();
         if (pid == 0)
         {
-            char *emptyPath = "";
-            setenv("PATH", emptyPath, 1);
+            unsetenv("PATH");
             char *exec_argv[4] = {"/bin/sh", "-c", cmd, NULL};
             execvp(exec_argv[0], exec_argv);
             fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
@@ -50,7 +53,7 @@ int main(void)
         else if (pid > 0)
         {
             int status;
-            wait(&status);
+            waitpid(pid, &status, 0);
             if (WIFEXITED(status))
             {
                 int exit_status = WEXITSTATUS(status);

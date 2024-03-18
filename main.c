@@ -6,54 +6,62 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
+/**
+ * main - Entry point for a simple UNIX command line interpreter.
+ *
+ * Return: Always 0.
+ */
 int main(void)
 {
-    char cmd[MAX_COMMAND_LENGTH];
-    char *newline;
-    pid_t pid;
-    int status;
+	char cmd[MAX_COMMAND_LENGTH];
+	char *newline;
+	pid_t pid;
+	int status;
 
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-        {
-            printf("$");
-        }
+	while (1)
+	{
+		if (isatty(STDIN_FILENO))
+		{
+			printf("$");
+			fflush(stdout); /* Ensure the prompt is displayed immediately. */
+		}
 
-        if (fgets(cmd, sizeof(cmd), stdin) == NULL)
-        {
-            printf("\n");
-            break;
-        }
+		if (!fgets(cmd, sizeof(cmd), stdin))
+		{
+			printf("\n"); /* Print newline on EOF. */
+			break;
+		}
 
-        newline = strchr(cmd, '\n');
-        if (newline)
-            *newline = '\0';
+		newline = strchr(cmd, '\n');
+		if (newline)
+			*newline = '\0'; /* Remove newline from input. */
 
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork failed");
-            exit(EXIT_FAILURE);
-        }
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork failed");
+			exit(EXIT_FAILURE);
+		}
 
-        if (pid == 0)
-        {
-            char *argv[2]; 
-            argv[0] = cmd;
-            argv[1] = NULL;
+		if (pid == 0)
+		{
+			/* Child process executes the command. */
+			char *argv[2] = {cmd, NULL};
+			execvp(cmd, argv);
+			/* If execvp returns, an error occurred. */
+			printf("simple_shell: command not found: %s\n", cmd);
+			exit(EXIT_FAILURE);
+		}
+		else
+		{
+			/* Parent process waits for the child to complete. */
+			waitpid(pid, &status, 0);
+			if (WIFEXITED(status))
+			{
+				/* Optionally handle the child's exit status. */
+			}
+		}
+	}
 
-            if (execvp(cmd, argv) == -1)
-            {
-                printf("simple_shell: command not found: %s\n", cmd);
-                exit(EXIT_FAILURE);
-            }
-        }
-        else
-        {
-            waitpid(pid, &status, 0);
-        }
-    }
-
-    return (0);
+	return (0);
 }

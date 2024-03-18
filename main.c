@@ -1,18 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
-
-#define BUFFER_SIZE 1024
-
-void display_prompt() {
-    printf("simple_shell$ ");
-    fflush(stdout);
-}
-
 int main() {
     char buffer[BUFFER_SIZE];
+    pid_t pid;
 
     while (1) {
         display_prompt();
@@ -24,7 +12,7 @@ int main() {
 
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        pid_t pid = fork();
+        pid = fork();
 
         if (pid == -1) {
             perror("fork failed");
@@ -47,3 +35,4 @@ int main() {
 
     return 0;
 }
+

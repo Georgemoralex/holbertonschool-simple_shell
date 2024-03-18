@@ -14,7 +14,7 @@ void display_prompt() {
 int main() {
     char buffer[BUFFER_SIZE];
     pid_t pid;
-    size_t length; // Declare length here
+    size_t length;
 
     while (1) {
         display_prompt();

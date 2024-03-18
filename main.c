@@ -32,8 +32,8 @@ int command_exists(const char *cmd) {
 
 int main(void) {
     char cmd[MAX_COMMAND_LENGTH];
-    char command_name[MAX_COMMAND_LENGTH]; // Move declaration to the top
-    char *space_pos; // Move declaration to the top
+    char command_name[MAX_COMMAND_LENGTH];
+    char *space_pos;
     pid_t pid;
     ssize_t read_bytes;
 

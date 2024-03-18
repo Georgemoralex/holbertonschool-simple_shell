@@ -6,22 +6,22 @@
 #include <sys/wait.h>
 
 #define MAX_COMMAND_LENGTH 1024
-#define DELIM " "
 
 /**
  * main - Entry point for a simple UNIX command line interpreter.
- * Reads commands using read() and executes each space-separated command,
- * displaying a prompt in interactive mode.
+ * Reads commands using read() and executes them, displaying a prompt
+ * in interactive mode. Designed to handle multi-line input, executing
+ * each line as a separate command.
  *
  * Return: Always 0 (Success).
  */
 int main(void)
 {
     char cmd[MAX_COMMAND_LENGTH];
-    int num_read;
     pid_t pid;
-    char *argv[2];
-    char *token;
+    int num_read;
+    char *argv[3]; /* Adjusted size for NULL termination */
+    int i;
 
     while (1)
     {
@@ -41,37 +41,36 @@ int main(void)
             }
             break;
         }
-        if (cmd[num_read - 1] == '\n')
-        {
-            cmd[num_read - 1] = '\0';
-        }
-        else
-        {
-            cmd[num_read] = '\0';
-        }
 
-        token = strtok(cmd, DELIM);
-        while (token != NULL)
+        /* Iterate through read characters to replace '\n' with '\0' */
+        for (i = 0; i < num_read; i++)
         {
-            pid = fork();
-            if (pid == -1)
+            if (cmd[i] == '\n')
             {
-                perror("fork");
-                exit(EXIT_FAILURE);
+                cmd[i] = '\0';
+                /* Fork and execute command */
+                pid = fork();
+                if (pid == 0) /* Child process */
+                {
+                    argv[0] = "/bin/sh";
+                    argv[1] = "-c";
+                    argv[2] = cmd; /* Execute command */
+                    if (execvp(argv[0], argv) == -1)
+                    {
+                        perror("execvp");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else if (pid > 0) /* Parent process */
+                {
+                    wait(NULL); /* Wait for child process */
+                }
+                else
+                {
+                    perror("fork");
+                    exit(EXIT_FAILURE);
+                }
             }
-            if (pid == 0)
-            {
-                argv[0] = token;
-                argv[1] = NULL;
-                execvp(token, argv);
-                perror("execvp");
-                exit(EXIT_FAILURE);
-            }
-            else
-            {
-                wait(NULL);
-            }
-            token = strtok(NULL, DELIM);
         }
     }
 

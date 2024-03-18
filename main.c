@@ -1,3 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 1024
+
+void display_prompt() {
+    printf("simple_shell$ ");
+    fflush(stdout);
+}
+
 int main() {
     char buffer[BUFFER_SIZE];
     pid_t pid;
@@ -35,4 +47,3 @@ int main() {
 
     return 0;
 }
-

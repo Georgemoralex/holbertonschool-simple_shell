@@ -32,6 +32,8 @@ int command_exists(const char *cmd) {
 
 int main(void) {
     char cmd[MAX_COMMAND_LENGTH];
+    char command_name[MAX_COMMAND_LENGTH]; // Move declaration to the top
+    char *space_pos; // Move declaration to the top
     pid_t pid;
     ssize_t read_bytes;
 
@@ -52,8 +54,7 @@ int main(void) {
 
         cmd[read_bytes - 1] = (cmd[read_bytes - 1] == '\n') ? '\0' : cmd[read_bytes - 1];
 
-        char *space_pos = strchr(cmd, ' ');
-        char command_name[MAX_COMMAND_LENGTH];
+        space_pos = strchr(cmd, ' ');
         if (space_pos != NULL) {
             strncpy(command_name, cmd, space_pos - cmd);
             command_name[space_pos - cmd] = '\0';

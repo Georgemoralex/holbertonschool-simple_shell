@@ -7,72 +7,48 @@
 
 #define MAX_COMMAND_LENGTH 1024
 
-/**
- * main - Entry point for a simple UNIX command line interpreter.
- * Reads commands using read() and executes them, displaying a prompt
- * in interactive mode. Designed to handle multi-line input, executing
- * each line as a separate command.
- *
- * Return: Always 0 (Success).
- */
-int main(void)
-{
+int main(void) {
     char cmd[MAX_COMMAND_LENGTH];
     pid_t pid;
-    int num_read;
-    char *argv[3]; /* Adjusted size for NULL termination */
-    int i;
+    ssize_t read_bytes;
 
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-        {
+    while (1) {
+        if (isatty(STDIN_FILENO)) {
             printf("$ ");
             fflush(stdout);
         }
 
-        memset(cmd, 0, MAX_COMMAND_LENGTH);
-        num_read = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
-        if (num_read <= 0)
-        {
-            if (isatty(STDIN_FILENO))
-            {
+        memset(cmd, 0, sizeof(cmd));
+        read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
+
+        if (read_bytes <= 0) {
+            if (isatty(STDIN_FILENO)) {
                 printf("\n");
             }
             break;
         }
 
-        /* Iterate through read characters to replace '\n' with '\0' */
-        for (i = 0; i < num_read; i++)
-        {
-            if (cmd[i] == '\n')
-            {
-                cmd[i] = '\0';
-                /* Fork and execute command */
-                pid = fork();
-                if (pid == 0) /* Child process */
-                {
-                    argv[0] = "/bin/sh";
-                    argv[1] = "-c";
-                    argv[2] = cmd; /* Execute command */
-                    if (execvp(argv[0], argv) == -1)
-                    {
-                        perror("execvp");
-                        exit(EXIT_FAILURE);
-                    }
-                }
-                else if (pid > 0) /* Parent process */
-                {
-                    wait(NULL); /* Wait for child process */
-                }
-                else
-                {
-                    perror("fork");
-                    exit(EXIT_FAILURE);
-                }
-            }
+        if (cmd[read_bytes - 1] == '\n') {
+            cmd[read_bytes - 1] = '\0';
+        }
+
+        pid = fork();
+        if (pid == 0) {
+        
+            char *argv[] = { "/bin/sh", "-c", cmd, NULL };
+            execvp(argv[0], argv);
+            fprintf(stderr, "Failed to execute command\n");
+            exit(EXIT_FAILURE);
+        } else if (pid > 0) {
+    
+            wait(NULL);
+        } else {
+  
+            perror("fork");
+            exit(EXIT_FAILURE);
         }
     }
 
-    return (0);
+    return 0;
 }
+

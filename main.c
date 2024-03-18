@@ -1,22 +1,35 @@
-#include "minishell.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int main(int argc, char **argv)
-{
-    char *cmdline;
-    char prompt[] = "(hsh) ";
-    Bool status = true;
+#define BUFFER_SIZE 1024
 
-    (void)argc;
+void display_prompt() {
+    printf("simple_shell$ ");
+    fflush(stdout);
+}
 
-    name = (argv[0] != NULL) ? argv[0] : NULL;
+int main() {
+    char buffer[BUFFER_SIZE];
+    int should_run = 1;
 
-    while (status)
-    {
-        write(1, prompt, strlen(prompt));
-        cmdline = get_user_input();
-        free(cmdline);
+    while (should_run) {
+        display_prompt();
+
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            perror("fgets failed");
+            exit(EXIT_FAILURE);
+        }
+
+        buffer[strcspn(buffer, "\n")] = '\0';
+
+        if (strcmp(buffer, "exit") == 0) {
+            should_run = 0;
+            continue;
+        }
+
+        printf("Executing command: %s\n", buffer);
     }
 
     return 0;
 }
-

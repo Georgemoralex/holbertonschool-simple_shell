@@ -23,7 +23,11 @@ int main() {
             break;
         }
 
-        buffer[strcspn(buffer, "\n")] = '\0';
+        size_t length = strlen(buffer);
+        while (length > 0 && (buffer[length - 1] == '\n' || buffer[length - 1] == ' ' || buffer[length - 1] == '\t')) {
+            buffer[length - 1] = '\0';
+            length--;
+        }
 
         pid = fork();
 

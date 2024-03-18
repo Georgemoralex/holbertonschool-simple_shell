@@ -50,7 +50,6 @@ int main(void)
             cmd[num_read] = '\0';
         }
 
-        // Tokenize the input and execute each command separately
         token = strtok(cmd, DELIM);
         while (token != NULL)
         {
@@ -60,7 +59,7 @@ int main(void)
                 perror("fork");
                 exit(EXIT_FAILURE);
             }
-            if (pid == 0) // Child process
+            if (pid == 0)
             {
                 argv[0] = token;
                 argv[1] = NULL;
@@ -68,11 +67,11 @@ int main(void)
                 perror("execvp");
                 exit(EXIT_FAILURE);
             }
-            else // Parent process
+            else
             {
-                wait(NULL); // Wait for the child process to finish
+                wait(NULL);
             }
-            token = strtok(NULL, DELIM); // Get the next command
+            token = strtok(NULL, DELIM);
         }
     }
 

@@ -13,6 +13,7 @@ void display_prompt() {
 
 int main() {
     char buffer[BUFFER_SIZE];
+    pid_t pid;
 
     while (1) {
         display_prompt();
@@ -24,7 +25,7 @@ int main() {
 
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        pid_t pid = fork();
+        pid = fork();
 
         if (pid == -1) {
             perror("fork failed");

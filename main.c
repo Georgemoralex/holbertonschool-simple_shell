@@ -30,13 +30,9 @@ int main() {
             perror("fork failed");
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
-            freopen("/dev/null", "w", stdout);
-            freopen("/dev/null", "w", stderr);
-            
-            if (execlp(buffer, buffer, NULL) == -1) {
-                perror("execlp failed");
-                exit(EXIT_FAILURE);
-            }
+            execlp("sh", "sh", "-c", buffer, NULL);
+            perror("execlp failed");
+            exit(EXIT_FAILURE);
         } else {
             int status;
             waitpid(pid, &status, 0);

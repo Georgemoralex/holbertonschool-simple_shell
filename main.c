@@ -32,35 +32,14 @@ int main(void)
             break;
         }
 
-        if (cmd[read_bytes - 1] == '\n')
-        {
-            cmd[read_bytes - 1] = '\0';
-        }
-        else
-        {
-            cmd[read_bytes] = '\0';
-        }
+        cmd[read_bytes - 1] = '\0';
 
         pid = fork();
         if (pid == 0)
         {
-            char *env_path = getenv("PATH");
-            if (env_path != NULL && strlen(env_path) == 0)
+            char *path_env = getenv("PATH");
+            if (path_env == NULL || strlen(path_env) == 0)
             {
-                char *common_dirs[] = {"/bin/", "/usr/bin/", NULL};
-                int i = 0;
-                while (common_dirs[i] != NULL)
-                {
-                    char full_path[MAX_COMMAND_LENGTH];
-                    snprintf(full_path, sizeof(full_path), "%s%s", common_dirs[i], cmd);
-                    if (access(full_path, X_OK) == 0)
-                    {
-                        execl(full_path, cmd, (char *)NULL);
-                        fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                        exit(127);
-                    }
-                    i++;
-                }
                 fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
                 exit(127);
             }
@@ -79,11 +58,11 @@ int main(void)
         else if (pid > 0)
         {
             int status;
-            wait(&status);
+            waitpid(pid, &status, 0);
             if (WIFEXITED(status))
             {
                 int exit_status = WEXITSTATUS(status);
-                if (exit_status != 0)
+                if (exit_status == 127)
                 {
                     continue;
                 }

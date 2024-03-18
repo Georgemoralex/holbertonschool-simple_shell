@@ -55,10 +55,6 @@ int main() {
             }
             output_buffer[bytes_read] = '\0';
             printf("%s", output_buffer);
-
-            if (output_buffer[strlen(output_buffer) - 1] == '\n') {
-                output_buffer[strlen(output_buffer) - 1] = '\0';
-            }
         }
     }
 

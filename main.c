@@ -15,7 +15,11 @@ int main(void)
 
     while (1)
     {
-        printf("$ ");
+        if (isatty(STDIN_FILENO))
+        {
+            printf("$ ");
+        }
+
         if (fgets(cmd, sizeof(cmd), stdin) == NULL)
         {
             printf("\n");
@@ -35,9 +39,10 @@ int main(void)
 
         if (pid == 0)
         {
-            char *argv[2];
+            char *argv[2]; 
             argv[0] = cmd;
             argv[1] = NULL;
+
             if (execvp(cmd, argv) == -1)
             {
                 printf("simple_shell: command not found: %s\n", cmd);

@@ -16,8 +16,6 @@ int main() {
     int pipefd[2];
     char output_buffer[BUFFER_SIZE];
 
-    ssize_t bytes_read;
-
     while (1) {
         display_prompt();
 
@@ -50,18 +48,17 @@ int main() {
             close(pipefd[1]);
             waitpid(pid, NULL, 0);
 
-            bytes_read = read(pipefd[0], output_buffer, sizeof(output_buffer));
+            ssize_t bytes_read = read(pipefd[0], output_buffer, sizeof(output_buffer));
             if (bytes_read == -1) {
                 perror("read failed");
                 exit(EXIT_FAILURE);
             }
             output_buffer[bytes_read] = '\0';
+            printf("%s", output_buffer);
 
-            if (bytes_read > 0 && output_buffer[bytes_read - 1] == '\n') {
-                output_buffer[bytes_read - 1] = '\0';
+            if (output_buffer[strlen(output_buffer) - 1] == '\n') {
+                output_buffer[strlen(output_buffer) - 1] = '\0';
             }
-
-            printf("%s\n", output_buffer);
         }
     }
 

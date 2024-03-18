@@ -32,33 +32,25 @@ int main(void)
             break;
         }
 
-        cmd[read_bytes - 1] = '\0';
+        if (cmd[read_bytes - 1] == '\n')
+        {
+            cmd[read_bytes - 1] = '\0';
+        }
 
         pid = fork();
         if (pid == 0)
         {
-            char *path_env = getenv("PATH");
-            if (path_env == NULL || strlen(path_env) == 0)
-            {
-                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                exit(127);
-            }
-            else
-            {
-                char *exec_argv[4];
-                exec_argv[0] = "/bin/sh";
-                exec_argv[1] = "-c";
-                exec_argv[2] = cmd;
-                exec_argv[3] = NULL;
-
-                execvp(exec_argv[0], exec_argv);
-                exit(EXIT_FAILURE);
-            }
+            char *emptyPath = "";
+            setenv("PATH", emptyPath, 1);
+            char *exec_argv[4] = {"/bin/sh", "-c", cmd, NULL};
+            execvp(exec_argv[0], exec_argv);
+            fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+            exit(127);
         }
         else if (pid > 0)
         {
             int status;
-            waitpid(pid, &status, 0);
+            wait(&status);
             if (WIFEXITED(status))
             {
                 int exit_status = WEXITSTATUS(status);

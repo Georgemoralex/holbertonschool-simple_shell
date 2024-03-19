@@ -37,28 +37,29 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            char *exec_argv[4];
-            exec_argv[0] = "/bin/sh";
-            exec_argv[1] = "-c";
-            exec_argv[2] = cmd;
-            exec_argv[3] = NULL;
+            char* path_env = getenv("PATH");
+            if (path_env != NULL && strlen(path_env) == 0)
+            {
+                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+                exit(127);
+            }
+            else
+            {
+                char *exec_argv[4];
+                exec_argv[0] = "/bin/sh";
+                exec_argv[1] = "-c";
+                exec_argv[2] = cmd;
+                exec_argv[3] = NULL;
 
-            execvp(exec_argv[0], exec_argv);
-            fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-            exit(127);
+                execvp(exec_argv[0], exec_argv);
+                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+                exit(127);
+            }
         }
         else if (pid > 0)
         {
             int status;
             wait(&status);
-            if (WIFEXITED(status))
-            {
-                int exit_status = WEXITSTATUS(status);
-                if (exit_status == 127)
-                {
-                    fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                }
-            }
         }
         else
         {

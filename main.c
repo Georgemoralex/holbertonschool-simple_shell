@@ -51,7 +51,7 @@ int main(void)
             int status;
             wait(&status);
         }
-        else // Error occurred
+        else
         {
             perror("fork");
             exit(EXIT_FAILURE);

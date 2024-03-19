@@ -12,6 +12,8 @@ int main(void)
     char cmd[MAX_COMMAND_LENGTH];
     pid_t pid;
     ssize_t read_bytes;
+    char *exec_argv[4];
+    int status;
 
     while (1)
     {
@@ -37,26 +39,21 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-    
             unsetenv("PATH");
-            char *exec_argv[4];
+
             exec_argv[0] = "sh";
             exec_argv[1] = "-c";
             exec_argv[2] = cmd;
             exec_argv[3] = NULL;
 
             execvp(exec_argv[0], exec_argv);
+
             fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
             exit(127);
         }
         else if (pid > 0)
         {
-            int status;
             wait(&status);
-            if (WIFEXITED(status))
-            {
-                return WEXITSTATUS(status);
-            }
         }
         else
         {

@@ -6,88 +6,65 @@
 #include <sys/wait.h>
 
 #define MAX_COMMAND_LENGTH 1024
-#define PATH_MAX 4096
 
-int command_exists(const char *cmd) {
-    char *paths[] = {
-        "/bin/",
-        "/usr/bin/",
-        "/sbin/",
-        "/usr/sbin/",
-        "/usr/local/bin/",
-        NULL
-    };
-    char full_path[PATH_MAX];
-    int i;
-
-    for (i = 0; paths[i] != NULL; i++) {
-        snprintf(full_path, sizeof(full_path), "%s%s", paths[i], cmd);
-        if (access(full_path, X_OK) == 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-int main(void) {
+int main(void)
+{
     char cmd[MAX_COMMAND_LENGTH];
-    char command_name[MAX_COMMAND_LENGTH];
-    char *space_pos;
     pid_t pid;
     ssize_t read_bytes;
 
-    while (1) {
-        if (isatty(STDIN_FILENO)) {
+    while (1)
+    {
+        if (isatty(STDIN_FILENO))
+        {
             printf("$ ");
             fflush(stdout);
         }
 
         memset(cmd, 0, sizeof(cmd));
         read_bytes = read(STDIN_FILENO, cmd, MAX_COMMAND_LENGTH - 1);
-        if (read_bytes <= 0) {
-            if (isatty(STDIN_FILENO)) {
+        if (read_bytes <= 0)
+        {
+            if (isatty(STDIN_FILENO))
+            {
                 printf("\n");
             }
             break;
         }
 
-        cmd[read_bytes - 1] = (cmd[read_bytes - 1] == '\n') ? '\0' : cmd[read_bytes - 1];
-
-        space_pos = strchr(cmd, ' ');
-        if (space_pos != NULL) {
-            strncpy(command_name, cmd, space_pos - cmd);
-            command_name[space_pos - cmd] = '\0';
-        } else {
-            strcpy(command_name, cmd);
-        }
-
-        if (!command_exists(command_name)) {
-            fprintf(stderr, "Command not found\n");
-            continue;
-        }
+        cmd[read_bytes - 1] = '\0';
 
         pid = fork();
-        if (pid == 0) {
-            char *argv[4];
+        if (pid == 0)
+        {
+            char *exec_argv[4];
+            exec_argv[0] = "/bin/sh";
+            exec_argv[1] = "-c";
+            exec_argv[2] = cmd;
+            exec_argv[3] = NULL;
 
-            argv[0] = "/bin/sh";
-            argv[1] = "-c";
-            argv[2] = cmd;
-            argv[3] = NULL;
-
-            execvp(argv[0], argv);
-            fprintf(stderr, "Failed to execute command\n");
-            exit(EXIT_FAILURE);
+            execvp(exec_argv[0], exec_argv);
+            fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+            exit(127);
         }
-        else if (pid > 0) {
-            wait(NULL);
+        else if (pid > 0)
+        {
+            int status;
+            wait(&status);
+            if (WIFEXITED(status))
+            {
+                int exit_status = WEXITSTATUS(status);
+                if (exit_status == 127)
+                {
+                    fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+                }
+            }
         }
-        else {
+        else
+        {
             perror("fork");
             exit(EXIT_FAILURE);
         }
     }
-
     return 0;
 }

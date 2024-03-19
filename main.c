@@ -40,22 +40,28 @@ int main(void)
         if (pid == 0)
         {
             unsetenv("PATH");
-
             exec_argv[0] = "sh";
             exec_argv[1] = "-c";
             exec_argv[2] = cmd;
             exec_argv[3] = NULL;
 
             execvp(exec_argv[0], exec_argv);
-
             fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
             exit(127);
         }
         else if (pid > 0)
         {
             wait(&status);
+            if (WIFEXITED(status))
+            {
+                int exit_status = WEXITSTATUS(status);
+                if (exit_status == 127)
+                {
+                    return 127;
+                }
+            }
         }
-        else
+        else // Fork failed
         {
             perror("fork");
             exit(EXIT_FAILURE);

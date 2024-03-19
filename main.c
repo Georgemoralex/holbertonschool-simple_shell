@@ -37,31 +37,21 @@ int main(void)
         pid = fork();
         if (pid == 0)
         {
-            char* path_env = getenv("PATH");
-            if (path_env != NULL && strlen(path_env) == 0)
-            {
-                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                exit(127);
-            }
-            else
-            {
-                char *exec_argv[4];
-                exec_argv[0] = "/bin/sh";
-                exec_argv[1] = "-c";
-                exec_argv[2] = cmd;
-                exec_argv[3] = NULL;
+            char *exec_argv[3];
+            exec_argv[0] = "sh";
+            exec_argv[1] = "-c";
+            exec_argv[2] = cmd;
+            
+            execvp(exec_argv[0], exec_argv);
 
-                execvp(exec_argv[0], exec_argv);
-                fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
-                exit(127);
-            }
+            fprintf(stderr, "./hsh: 1: %s: not found\n", cmd);
+            exit(127);
         }
         else if (pid > 0)
-        {
             int status;
             wait(&status);
         }
-        else
+        else // Error occurred
         {
             perror("fork");
             exit(EXIT_FAILURE);

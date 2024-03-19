@@ -61,7 +61,7 @@ int main(void)
                 }
             }
         }
-        else // Fork failed
+        else
         {
             perror("fork");
             exit(EXIT_FAILURE);
